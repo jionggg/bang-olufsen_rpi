@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# laptop_subscriber.py — subscribe to house/anchors/# and save JSON (paho v1.x)
+# pc_subscriber.py — subscribe to house/anchors/# and save JSON
 import os, json, pathlib
 from datetime import datetime
 import paho.mqtt.client as mqtt
@@ -22,7 +22,7 @@ def on_message(client, userdata, msg):
     try:
         payload = json.loads(msg.payload.decode("utf-8"))
         device = str(payload.get("device_id", "unknown"))
-        ts = datetime.now().strftime("%YMM%d_%H%M%S_%f")[:-3]  # filename timestamp
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
         folder = SAVE_DIR / device
         ensure_dir(folder)
         fname = folder / f"{ts}.json"
@@ -32,7 +32,7 @@ def on_message(client, userdata, msg):
     except Exception as e:
         print(f"Bad message on {msg.topic}: {e}")
 
-client = mqtt.Client(client_id="laptop-sub")  # v1.x style
+client = mqtt.Client(client_id="pc-sub")
 client.on_connect = on_connect
 client.on_message = on_message
 client.connect(BROKER_HOST, BROKER_PORT, keepalive=60)
