@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-UWB → Vector JSON logger (RPi)
+UWB UART → Vector JSON logger (RPi)
 
 Reads Dist/m, Azi/deg, Elev/deg from 2BP UART,
 converts to Cartesian vector (x,y,z), and writes rolling JSON files.
@@ -9,20 +9,15 @@ Coordinate convention:
 - Azimuth θ: angle in XY-plane from +X toward +Y (CCW).
 - Elevation φ: angle from horizon (XY-plane) upward (-Z).   
 
-say:
-cφ = cos(el_rad)
-sφ = sin(el_rad)
-cθ = cos(az_rad)
-sθ = sin(az_rad)
+legend:
+  x: forward (anchor normal)
+  y: left
+  z: up     
 
-x_local =  r * cφ * cθ
-y_local = -r * cφ * sθ     # minus because +az is “to the right”
-z_local = -r * sφ          # minus because +el is “down”      
+can tune FILE_MAX_SECONDS & FILE_MAX_SAMPLES (basically how often to write a new file, whichever gets hit first)
 
-Tune FILE_MAX_SECONDS / FILE_MAX_SAMPLES as you like.
-
-Dependencies: pyserial
-  sudo apt-get install -y python3-serial
+dependencies: pyserial
+  sudo apt-get install -y python3-serial 
 """
 
 import os, re, json, time, math, serial
@@ -34,13 +29,14 @@ BAUD        = 3_000_000
 
 FILE_MAX_SECONDS = 1.0
 FILE_MAX_SAMPLES = 200
-OUT_DIR          = "./uwb_json"
+OUT_DIR          = "./uwb_json" #folder
 
 INCLUDE_RAW   = True
 INCLUDE_LOCAL = True  # keep local vector for debugging/PGO
 INCLUDE_GLOBAL= True
+# ====== END CONFIG ======
 
-# Per-anchor orientation (degrees). Fill these with your real headings.
+# Per-anchor orientation (degrees). 
 # yaw: CCW about +Z from global +X; pitch: about +Y; roll: about +X.
 ANCHOR_POSE = {
     # id : (yaw_deg, pitch_deg, roll_deg)
@@ -51,7 +47,7 @@ ANCHOR_POSE = {
     # add more as needed
 }
 
-# ====== REGEX ======
+# RegEx, uwb data
 re_dist  = re.compile(r"TWR\[(\d+)\]\.distance\s*:\s*([-\d.]+)")
 re_azimu = re.compile(r"TWR\[(\d+)\]\.aoa_azimuth\s*:\s*([-\d.]+)")
 re_elev  = re.compile(r"TWR\[(\d+)\]\.aoa_elevation\s*:\s*([-\d.]+)")
@@ -60,10 +56,10 @@ def deg2rad(d): return d * math.pi / 180.0
 
 def r_local_from_az_el(dist_m: float, az_deg: float, el_deg: float):
     """
-    Your convention:
+    convention:
       +az = right, -az = left; 0 = forward (board normal)
       +el = down,  -el = up;   0 = horizontal
-    Local axes: x=forward, y=left, z=up
+    local axes: x=forward, y=left, z=up
     """
     th = deg2rad(az_deg)
     ph = deg2rad(el_deg)
@@ -71,8 +67,8 @@ def r_local_from_az_el(dist_m: float, az_deg: float, el_deg: float):
     cth, sth = math.cos(th), math.sin(th)
 
     x = dist_m * cph * cth
-    y = -dist_m * cph * sth   # minus: +az is to the RIGHT
-    z = -dist_m * sph         # minus: +el is DOWN
+    y = -dist_m * cph * sth   # minus bc +az is to the RIGHT
+    z = -dist_m * sph         # minus bc +el is DOWN
     return (x, y, z)
 
 def rot_zyx(yaw_deg: float, pitch_deg: float, roll_deg: float):
