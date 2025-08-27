@@ -1,7 +1,18 @@
+# Set up
+```
+[Master RPi: Mosquitto broker] ──+
+  └─ runs master.py → publishes to house/anchors/<MASTER_ID>
+[Slave RPis] ──────────────────────┤
+  └─ runs slave.py  → publishes to house/anchors/<SLAVE_ID>
+[PC/Laptop] ──────────────────────┘
+  └─ runs laptop_subscriber.py → subscribes to house/anchors/# and saves JSON
+```
+
+
 # Set up RPis
 
 
-## Master RPi
+## Master RPi   // right now it is RPi3B+
 ### Install broker
 ```
 sudo apt update
@@ -48,3 +59,14 @@ On laptop:
 python3 laptop_subscriber.py
 # press Enter to use mqtt-broker.local
 ```
+
+
+Master → “Enter device_id for MASTER?”
+Any unique, no-spaces name for that RPi. Examples: master-1, anchor-master, rpi-hub.
+This makes the topic house/anchors/<your_id>, e.g. house/anchors/master-1.
+
+Slave → “Enter device_id for SLAVE?”
+Same idea—unique per device. Examples: anchor-01, anchor-livingroom, anchor-kitchen-2.
+
+Slave → “Enter MASTER broker IP?”
+If you set the hostname earlier, enter mqtt-broker.local (or just press Enter if your prompt default is that).

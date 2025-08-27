@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
-# master.py — publish JSON to house/anchors/<device_id> via local broker
-import json, time, os, sys, socket
+# master.py — publish JSON to house/anchors/<device_id> via local broker (paho v1.x)
+import json, time, os
 from datetime import datetime
-from paho.mqtt import client as mqtt
+import paho.mqtt.client as mqtt
 
 DEVICE_ID = input("Enter device_id for MASTER: ").strip() or "master-1"
 BROKER_HOST = "127.0.0.1"
 BROKER_PORT = 1883
 TOPIC_BASE = "house/anchors"
+pub_hz = float(os.getenv("PUB_HZ", "2"))
 
-pub_hz = float(os.getenv("PUB_HZ", "2"))  # messages per second
-
-def on_connect(client, userdata, flags, rc, properties=None):
+def on_connect(client, userdata, flags, rc):
     print("Connected" if rc == 0 else f"Connect failed rc={rc}")
 
-client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"pub-{DEVICE_ID}")
+client = mqtt.Client(client_id=f"pub-{DEVICE_ID}")  # v1.x style
 client.on_connect = on_connect
 client.connect(BROKER_HOST, BROKER_PORT, keepalive=30)
 client.loop_start()
