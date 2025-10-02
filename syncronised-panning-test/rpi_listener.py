@@ -126,5 +126,5 @@ if __name__ == "__main__":
 # python3 rpi_listener.py --id 1 --broker 127.20.10.9 --audio /syncronised-panning-test/smooth-ac-guitar-loop.mp3
 
 # # On Pi #2 (right)
-# python3 rpi_listener.py --id 2 --broker 172.20.10.8 --audio /syncronised-panning-test/smooth-ac-guitar-loop.mp3
+# python3 rpi_listener.py --id 2 --broker 172.20.10.9 --audio /syncronised-panning-test/smooth-ac-guitar-loop.mp3
 
