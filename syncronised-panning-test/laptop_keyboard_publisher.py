@@ -77,7 +77,7 @@ if __name__ == "__main__":
     main()
 
 
-## tor un:
+## to run:
 # python3 -m pip install paho-mqtt pynput
 # python3 laptop_keyboard_publisher.py --broker 172.20.10.9 --port 1883
 
