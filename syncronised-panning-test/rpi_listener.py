@@ -102,7 +102,8 @@ def main():
     args = ap.parse_args()
 
     player = Player(args.audio)
-    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"rpi-{args.id}", userdata={"pi_id": args.id, "player": player})
+    client = mqtt.Client(client_id="rpi-{args.id}", userdata={"pi_id": args.id, "player": player})
+    #client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"rpi-{args.id}", userdata={"pi_id": args.id, "player": player}) # new paho version 2.0.0 or later
     client.on_connect = on_connect
     client.on_message = on_message
     client.connect(args.broker, args.port, keepalive=60)
